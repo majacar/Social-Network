@@ -1,15 +1,47 @@
 {
   "name": "socialnetwork",
   "version": "0.0.0",
-  "private": true,
-  
+  "description": "Social Network API",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha --require=env-test --timeout 5000 tests --recursive" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/majacar/Social-Network"
+  },
+   "author": "Maja Plavsa <plavsamaja@gmail.com>",
+
   "dependencies": {
-    "body-parser": "~1.15.2",
-    "cookie-parser": "~1.4.3",
-    "debug": "~2.2.0",
-    "express": "~4.14.0",
-    "jade": "~1.11.0",
-    "morgan": "~1.7.0",
-    "serve-favicon": "~2.3.0"
+    "async": "^2.1.4",
+    "aws-sdk": "^2.6.14",
+    "bcryptjs": "^2.3.0",
+    "body-parser": "^1.15.2",
+    "compression": "^1.6.2",
+    "express": "^4.14.0",
+    "express-jwt": "^5.1.0",
+    "fs": "0.0.2",
+    "jsonwebtoken": "^7.1.9",
+    "lodash": "^4.16.6",
+    "lusca": "^1.4.1",
+    "moment": "^2.17.1",
+    "mongoose": "^4.6.6",
+    "mongoose-simple-random": "^0.3.3",
+    "node-uuid": "^1.4.7",
+    "posix": "^4.1.1",
+    "s3": "^4.4.0",
+    "sendgrid": "^2.0.0",
+    "sharp": "^0.16.2",
+    "shortid": "^2.2.6",
+    "slug": "^0.9.1",
+    "tmp": "0.0.29",
+    "util": "^0.10.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "env-test": "^1.0.0",
+    "faker": "^3.1.0",
+    "jscs": "^3.0.7",
+    "mocha": "^3.1.2",
+    "supertest": "^2.0.1"
   }
 }
