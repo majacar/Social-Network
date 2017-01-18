@@ -1,46 +1,110 @@
+var port = process.env.PORT || 8008;
+
+// init
 var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var compression = require('compression');
+var mongoose = require('mongoose');
+var expressJwt = require('express-jwt');
+var lusca = require('lusca');
+var config = require('./config');
+var AuthCheck = require('./config/auth_check');
+var ErrorHandler = require('./config/error_handler');
+var posix = require('posix');
+var random = require('mongoose-simple-random');
+var moment = require('moment');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
+require('http').globalAgent.maxSockets = Infinity;
 
+// raise maximum number of open file descriptors to 10k,
+// hard limit is left unchanged
+if (process.env.NODE_ENV !== 'test' || process.env.NODE_ENV !== 'localhost') {
+  posix.setrlimit('nofile', { soft: 10000, hard: 10000 });
+}
+
+// the app
 var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+// router and controllers
+var router = express.Router();
+var UsersController = require('./routes/users');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+// include in the app
+app.use(config.cors);
+app.use(config.XPoweredBy);
+app.use(compression());
+app.use(bodyParser.json({ limit: '15mb' }));
+app.use(expressJwt({
+  secret: config.getTokenSecret(),
+  getToken: function fromHeaderOrQuerystring (req) {
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      return req.headers.authorization.split(' ')[1];
+    } else if (req.query && req.query.token) {
+      return req.query.token;
+    }
+    return null;
+  }
+}).unless({
+  path: [
+    '/api/v1/signup'
+  ]
+}));
 
-app.use('/', index);
-app.use('/users', users);
+// security
+app.use(lusca.xframe('ALLOWALL'));
+app.use(lusca.xframe('SAMEORIGIN'));
+app.use(lusca.xssProtection(true));
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+// Create the database connection
+mongoose.connect(config.db());
+mongoose.connection.on('connected', function () {
+  console.log('Mongoose default connection open to ' + config.db());
 });
+
+// CONNECTION EVENTS
+// If the connection throws an error
+mongoose.connection.on('error', function (err) {
+  console.log('Mongoose default connection error: ' + err);
+});
+
+// When the connection is disconnected
+mongoose.connection.on('disconnected', function () {
+  console.log('Mongoose default connection disconnected');
+});
+
+// When the connection is open
+mongoose.connection.on('open', function () {
+  console.log('Mongoose default connection is open');
+});
+
+// If the Node process ends, close the Mongoose connection
+process.on('SIGINT', function () {
+  mongoose.connection.close(function () {
+    console.log('Mongoose default connection disconnected through app termination');
+    process.exit(0);
+  });
+});
+
+// routes
+router
+  .post('/signup', UsersController.signup);
+
+app.use('/api/v1', router);
 
 // error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.use(ErrorHandler());
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+// start the app
+app.listen(port, '0.0.0.0');
+
+// show env vars
+console.log('____________ SocialNetwork ____________');
+console.log('Starting on port: ' + port);
+
+if (process.env.NODE_ENV == 'test' || process.env.NODE_ENV == 'localhost') {
+  // console.log(process.env);
+}
+
+console.log('_______________________________');
 
 module.exports = app;
