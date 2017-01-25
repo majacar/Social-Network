@@ -9,6 +9,9 @@ var config = require('../config');
 var User = require('../models/user');
 var slug = require('slug');
 var shortid = require('shortid');
+var Email = require('../modules/send_mail');
+var moment = require('moment');
+
 
 /*
  * @api {post} /signup User registration
@@ -173,6 +176,94 @@ if (req.body && req.body.email && req.body.username && req.body.password) {
     return next(error);
   });
   }
+  } else {
+    var error = new Error();
+    error.name = 'MissingParamsError';
+    return next(error);
+  }
+};
+
+/**
+ * @api {post} /forgot
+ * @apiVersion 1.0.0
+ * @apiName Forgot password
+ * @apiDescription User forgot password
+ * @apiGroup User
+ *
+ * @apiParam {String} email  User email.
+ *
+ *@apiSuccessExample Success-Response:
+ HTTP/1.1 200 OK
+  {
+  "status": "ok",
+  "resetToken": "Bk343clZg"
+  }
+ */
+module.exports.forgotPassword = function (req, res, next) {
+  if (req.body && req.body.email) {
+    User.findOne({ email: req.body.email }).lean().exec().then(function (user) {
+      if (!user) {
+        var error = new Error();
+        error.name = 'EmailDoesNotExist';
+        return next(error);
+      } else {
+        var reset_token = shortid.generate(),
+          reset_link = req.protocol + '://' + req.get('host') + '/#!/?reset=' + reset_token;
+        // save token to db
+        var exp_date = new Date(moment(new Date).add(2, 'days'));
+        if (process.env.NODE_ENV == 'test') {
+          exp_date = new Date();
+        }
+        User.update({ email: req.body.email }, {
+          $set: {
+            tmp: reset_token,
+            tmp_expiry: exp_date
+          }
+        }).exec().then(function () {
+          if (process.env.NODE_ENV == 'test') {
+            User.findOne({ email: req.body.email }).lean().exec().then(function (updated_user) {
+              res.status(200).send({
+                status: 'ok',
+                message: 'Password reset email sent',
+                reset_token: reset_token,
+                tmp_expiry: updated_user.tmp_expiry
+              });
+            }).catch(function (err) {
+              var error = new Error();
+              error.name = 'MongoGetError';
+              error.message = err.message;
+              return next(error);
+            });
+          } else {
+            var sub_params = [
+              ['-link-', reset_link]
+            ];
+            Email.sendMail(req.body.email, 'Create your new Social Network password', sub_params, 'forgot-password', function (err) {
+              if (err) {
+                var error = new Error();
+                error.name = 'EmailNotSentError';
+                return next(error);
+              } else {
+                res.status(200).send({
+                  status: 'ok',
+                  message: 'Password reset email sent'
+                });
+              }
+            });
+          }
+        }).catch(function (err) {
+          var error = new Error();
+          error.name = 'MongoSaveError';
+          error.message = err.message;
+          return next(error);
+        });
+      }
+    }).catch(function (err) {
+      var error = new Error();
+      error.name = 'MongoGetError';
+      error.message = err.message;
+      return next(error);
+    });
   } else {
     var error = new Error();
     error.name = 'MissingParamsError';

@@ -47,7 +47,8 @@ app.use(expressJwt({
 }).unless({
   path: [
     '/api/v1/signup',
-    '/api/v1/signin'
+    '/api/v1/signin',
+    '/api/v1/forgot'
   ]
 }));
 
@@ -89,7 +90,8 @@ process.on('SIGINT', function () {
 // routes
 router
   .post('/signup', UsersController.signup)
-  .post('/signin', UsersController.signin);
+  .post('/signin', UsersController.signin)
+  .post('/forgot', UsersController.forgotPassword);
 
 app.use('/api/v1', router);
 
