@@ -133,9 +133,7 @@ if (req.body && req.body.email && req.body.username && req.body.password) {
       return next(error);
     } else {
 
-      User.findOne({ $or: [{ email: req.body.email }, { username: req.body.username }] })
-      .lean().exec()
-      .then(function (user) {
+      User.findOne({ email: req.body.email }).lean().exec().then(function (user) {
 
       if (!user) {
         var error = new Error();
@@ -143,7 +141,7 @@ if (req.body && req.body.email && req.body.username && req.body.password) {
         return next(error);
       }
 
-      if (user && !user.isActive) {
+      if (!user.isActive) {
         var error = new Error();
         error.name = 'Forbidden';
         error.message = 'Your account is pending approval';
@@ -157,7 +155,8 @@ if (req.body && req.body.email && req.body.username && req.body.password) {
             status: 'ok',
             token: config.issueNewToken({
               id: user._id,
-              name: user.username
+              name: user.username,
+              email: user.email
             }),
             results: user
           });

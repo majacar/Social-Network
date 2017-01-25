@@ -12,7 +12,7 @@ var User = new Schema({
   password: { type: String, required: true },
   fullName: { type: String },
   resetToken: String, // Used for storing a token for forgot password
-  isActive: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
   date_created: { type: Date, default: Date.now },
 }, { versionKey: false });
 
