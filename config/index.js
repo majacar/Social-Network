@@ -4,11 +4,18 @@ var jwt = require('jsonwebtoken');
  * Databases settings
  * @returns {string}
  */
+
 module.exports.db = function () {
   if (process.env.NODE_ENV == 'production') {
-    return 'mongodb://localhost:27017/socialnetwork_dev';
+   return 'mongodb://localhost:27017/socialnetwork_dev';
   } else if (process.env.NODE_ENV == 'development') {
+    var db = 'socialnetwork_dev';
+
+    if (process.env.NODE_ENV_QA && process.env.NODE_ENV_QA == 'true') {
+      db = 'socialnetwork_qa';
+    }
     return 'mongodb://localhost:27017/socialnetwork_dev';
+   
   } else if (process.env.NODE_ENV == 'test') {
     return 'mongodb://localhost:27017/socialnetwork_test';
   } else {

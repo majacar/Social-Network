@@ -206,8 +206,7 @@ module.exports.forgotPassword = function (req, res, next) {
         var error = new Error();
         error.name = 'EmailDoesNotExist';
         return next(error);
-      } 
-
+      } else {
         var reset_token = shortid.generate(),
           reset_link = req.protocol + '://' + req.get('host') + '/#!/?reset=' + reset_token;
         // save token to db
@@ -215,8 +214,12 @@ module.exports.forgotPassword = function (req, res, next) {
         if (process.env.NODE_ENV == 'test') {
           exp_date = new Date();
         }
-        User.update({ email: req.body.email }, { $set: { tmp: reset_token, tmp_expiry: exp_date }})
-        .exec().then(function () {
+        User.update({ email: req.body.email }, {
+          $set: {
+            tmp: reset_token,
+            tmp_expiry: exp_date
+          }
+        }).exec().then(function () {
           if (process.env.NODE_ENV == 'test') {
             User.findOne({ email: req.body.email }).lean().exec().then(function (updated_user) {
               res.status(200).send({
@@ -235,7 +238,7 @@ module.exports.forgotPassword = function (req, res, next) {
             var sub_params = [
               ['-link-', reset_link]
             ];
-            Email.sendMail(req.body.email, 'Create your new Social Network password', sub_params, 'forgot-password', function (err) {
+            Email.sendMail(req.body.email, 'Create your new MakerSights password', sub_params, 'forgot-password', function (err) {
               if (err) {
                 var error = new Error();
                 error.name = 'EmailNotSentError';
@@ -253,7 +256,8 @@ module.exports.forgotPassword = function (req, res, next) {
           error.name = 'MongoSaveError';
           error.message = err.message;
           return next(error);
-        });     
+        });
+      }
     }).catch(function (err) {
       var error = new Error();
       error.name = 'MongoGetError';
