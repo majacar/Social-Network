@@ -196,8 +196,8 @@ if (req.body && req.body.email && req.body.username && req.body.password) {
  HTTP/1.1 200 OK
   {
   "status": "ok",
-  "resetToken": "Bk343clZg"
-  }
+  "message": "Password reset email sent"
+}
  */
 module.exports.forgotPassword = function (req, res, next) {
   if (req.body && req.body.email) {
@@ -214,12 +214,8 @@ module.exports.forgotPassword = function (req, res, next) {
         if (process.env.NODE_ENV == 'test') {
           exp_date = new Date();
         }
-        User.update({ email: req.body.email }, {
-          $set: {
-            tmp: reset_token,
-            tmp_expiry: exp_date
-          }
-        }).exec().then(function () {
+        User.update({ email: req.body.email }, { $set: { tmp: reset_token, tmp_expiry: exp_date }})
+        .exec().then(function () {
           if (process.env.NODE_ENV == 'test') {
             User.findOne({ email: req.body.email }).lean().exec().then(function (updated_user) {
               res.status(200).send({

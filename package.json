@@ -4,13 +4,13 @@
   "description": "Social Network API",
   "main": "app.js",
   "scripts": {
-    "test": "mocha --require=env-test --timeout 5000 tests --recursive" },
+    "test": "mocha --require=env-test --timeout 5000 tests --recursive"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/majacar/Social-Network"
   },
-   "author": "Maja Plavsa <plavsamaja@gmail.com>",
-
+  "author": "Maja Plavsa <plavsamaja@gmail.com>",
   "dependencies": {
     "async": "^2.1.4",
     "aws-sdk": "^2.6.14",
