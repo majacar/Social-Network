@@ -132,4 +132,4 @@ dev.sh
 test.sh
 
 
-node_modules
+node_modulessendgrid.env
