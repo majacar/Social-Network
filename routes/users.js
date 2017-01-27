@@ -206,7 +206,8 @@ module.exports.forgotPassword = function (req, res, next) {
         var error = new Error();
         error.name = 'EmailDoesNotExist';
         return next(error);
-      } else {
+      } 
+
         var reset_token = shortid.generate(),
           reset_link = req.protocol + '://' + req.get('host') + '/#!/?reset=' + reset_token;
         // save token to db
@@ -252,8 +253,7 @@ module.exports.forgotPassword = function (req, res, next) {
           error.name = 'MongoSaveError';
           error.message = err.message;
           return next(error);
-        });
-      }
+        });     
     }).catch(function (err) {
       var error = new Error();
       error.name = 'MongoGetError';
