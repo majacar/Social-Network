@@ -238,7 +238,7 @@ module.exports.forgotPassword = function (req, res, next) {
             var sub_params = [
               ['-link-', reset_link]
             ];
-            Email.sendMail(req.body.email, 'Create your new MakerSights password', sub_params, 'forgot-password', function (err) {
+            Email.sendMail(req.body.email, 'Create your new SocialNetwork password', sub_params, 'forgot-password', function (err) {
               if (err) {
                 var error = new Error();
                 error.name = 'EmailNotSentError';

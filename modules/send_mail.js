@@ -36,7 +36,11 @@ function sendMail(address, subject, subParams, templateName, cb) {
       });
       email.from = templates[j].from_mail;
       email.fromname = templates[j].fromname;
-      email.subject = templates[j].subject;      
+      if (templateName == 'merchant-existing') {
+        email.subject = subject;
+      } else {
+        email.subject = templates[j].subject;
+      }
     }
   }
 
@@ -45,6 +49,7 @@ function sendMail(address, subject, subParams, templateName, cb) {
 
   sendgrid.send(email, function (err, result) {
     if (err) {
+      utils.logError('regular', err);
       console.log('Error sending mails: ', err);
       return cb(err);
     } else {
