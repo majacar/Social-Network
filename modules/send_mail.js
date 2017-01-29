@@ -36,11 +36,7 @@ function sendMail(address, subject, subParams, templateName, cb) {
       });
       email.from = templates[j].from_mail;
       email.fromname = templates[j].fromname;
-      if (templateName == 'merchant-existing') {
-        email.subject = subject;
-      } else {
-        email.subject = templates[j].subject;
-      }
+      email.subject = templates[j].subject;      
     }
   }
 
