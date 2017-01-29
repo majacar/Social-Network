@@ -315,7 +315,6 @@ module.exports.resetPassword = function (req, res, next) {
           return next(error);
         } else {
           user.password = bcryptjs.hashSync(req.body.password, 10);
-          user.reset_token = undefined;
 
           // save new password
           user.save(function (err, savedUser) {
