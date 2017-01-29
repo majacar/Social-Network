@@ -73,3 +73,58 @@ describe('Forgot password', function () {
   });
 
 });
+
+describe('Reset password', function () {
+
+  it('POST /reset Should return missing parameters', function (done) {
+
+    request(app)
+      .post('/api/v1/reset')
+      .set('Accept', 'application/json')
+      .send()
+      .expect(400)
+      .end(function (err, res) {
+        if (err) {
+          throw err;
+        }
+        should.not.exist(err);
+        res.body.status.should.equal('error');
+        res.body.message.should.equal('Missing parameters');
+        done();
+      });
+  });
+
+  it('POST /reset Should return successfully reset password and delete tmp and tmp_expiry', function (done) {
+    userHelper.register_user(function (result) {
+    
+        request(app)
+        .post('/api/v1/forgot')
+        .set('Accept', 'application/json')
+        .send({ email: result.user.email })
+        .end(function (err, res) {
+         
+          request(app)
+           .post('/api/v1/reset')
+           .set('Accept', 'application/json')
+           .send({
+             password: "123",
+             confirm: "123",
+             reset_token: res.body.reset_token
+             })
+           .expect(201)
+           .end(function (err, res) {
+             if (err) {
+             throw err;
+             }
+        should.not.exist(err);
+        should.exist(res.body.results);
+        should.not.exist(res.body.tmp);
+        should.not.exist(res.body.tmp_expiry);
+        res.body.status.should.equal('ok');
+        res.body.message.should.equal('Password is successfully changed');
+        done();
+      });
+    });
+   });
+  });
+});
