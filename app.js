@@ -48,7 +48,8 @@ app.use(expressJwt({
   path: [
     '/api/v1/signup',
     '/api/v1/signin',
-    '/api/v1/forgot'
+    '/api/v1/forgot',
+    '/api/v1/reset'
   ]
 }));
 
@@ -91,7 +92,8 @@ process.on('SIGINT', function () {
 router
   .post('/signup', UsersController.signup)
   .post('/signin', UsersController.signin)
-  .post('/forgot', UsersController.forgotPassword);
+  .post('/forgot', UsersController.forgotPassword)
+  .post('/reset', UsersController.resetPassword);
 
 app.use('/api/v1', router);
 
