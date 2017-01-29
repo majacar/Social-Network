@@ -14,6 +14,8 @@ var User = new Schema({
   resetToken: String, // Used for storing a token for forgot password
   isActive: { type: Boolean, default: true },
   date_created: { type: Date, default: Date.now },
+  tmp: { type: String },
+  tmp_expiry: { type: Date },
 }, { versionKey: false });
 
 User.path('email').validate(function (email) {
