@@ -238,7 +238,7 @@ module.exports.forgotPassword = function (req, res, next) {
             var sub_params = [
               ['-link-', reset_link]
             ];
-            Email.sendMail(req.body.email, 'Create your new MakerSights password', sub_params, 'forgot-password', function (err) {
+            Email.sendMail(req.body.email, 'Create your new SocialNetwork password', sub_params, 'forgot-password', function (err) {
               if (err) {
                 var error = new Error();
                 error.name = 'EmailNotSentError';
@@ -264,6 +264,87 @@ module.exports.forgotPassword = function (req, res, next) {
       error.message = err.message;
       return next(error);
     });
+  } else {
+    var error = new Error();
+    error.name = 'MissingParamsError';
+    return next(error);
+  }
+};
+
+/**
+ * @api {post} /reset
+ * @apiVersion 1.0.0
+ * @apiName Reset password
+ * @apiDescription User reset password
+ * @apiGroup User
+ *
+ * @apiParam {String} pasword User password.
+ *
+ * @apiSuccessExample Success-Response:
+ HTTP/1.1 201 OK
+ {
+  "status": "ok",
+  "message": "Password is successfully changed",
+  "results": {
+    "_id": "58231ac1ed33431c2af972ba",
+    "updatedAt": "2016-11-11T17:26:35.949Z",
+    "createdAt": "2016-11-09T12:46:57.733Z",
+    "username": "maja",
+    "email": "maja@soundhills.com",
+    "isActive": true
+  }
+}
+ */
+
+module.exports.resetPassword = function (req, res, next) {
+  if (req.body && req.body.password && req.body.confirm && req.body.reset_token) {
+    User.findOneAndUpdate({ tmp: req.body.reset_token }, { $unset: { tmp: "", tmp_expiry: "" }}, { new: true })
+    .exec().then(function (user) {
+
+      if (user) {
+        // ignore validation
+        user.$ignore('email');
+        user.$ignore('username');
+
+        var password = req.body.password;
+        var confirm = req.body.confirm;
+
+        if (password !== confirm) {
+          var error = new Error();
+          error.name = 'NotAcceptable';
+          return next(error);
+        } else {
+          user.password = bcryptjs.hashSync(req.body.password, 10);
+
+          // save new password
+          user.save(function (err, savedUser) {
+            if (err) {
+              var error = new Error();
+              error.name = 'MongoSaveError';
+              error.message = err.message;
+              return next(error);
+            } else {
+              savedUser = savedUser.toObject();
+              delete savedUser.password;
+              res.status(201).send({
+                status: 'ok',
+                message: 'Password is successfully changed',
+                results: savedUser
+              });
+            }
+          });
+        }
+      } else {
+        var error = new Error();
+        error.name = 'UnauthorizedError';
+        return next(error);
+      }
+  }).catch(function (err) {
+    var error = new Error();
+    error.name = 'MongoGetError';
+    error.message = err.message;
+    return next(error);
+  });
   } else {
     var error = new Error();
     error.name = 'MissingParamsError';
