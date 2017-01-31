@@ -53,44 +53,48 @@ if (req.body && req.body.email && req.body.username && req.body.password) {
       user.fullName = req.body.fullName;
     }
 
-    // validate user
-    user.validate(function (err) {
-      if (err) {
-        var error = new Error();
-        if (!_.isUndefined(err.errors) && (!_.isUndefined(err.errors.email) )) {
-          if (!_.isUndefined(err.errors.email)) {
-            error.name = 'DuplicateEmailError';
-            error.message = err.errors.email.message;
-          } 
-        }
+  // save to db
+  user.save().then(function (saved_user) {
+    delete saved_user.password;
+  
+    if (process.env.NODE_ENV == 'test') {
+      res.status(201).send({
+        status: 'ok',
+        message: 'Successfully registered',
+        token: config.issueNewToken(
+          {
+            id: saved_user._id,
+            name: saved_user.name,
+            email: saved_user.email
+          }),
+        results: saved_user
+      });
+    } else {
+        redirect_link = req.protocol + '://' + req.get('host') + '/#!/?redirect='
 
-        return next(error);
-      } else {
-        
-          // save user to db
-          user.save().then(function (savedUser) {
-          
-              delete savedUser.password;
-              savedUser = savedUser.toObject();
-              
-              res.status(201).send({
-                status: 'ok',
-                message: 'Successfully registered',
-                token: config.issueNewToken({
-                  id: savedUser._id,
-                  name: savedUser.username
-                }),
-                results: savedUser
-              });
-            }).catch(function (err) {
+       var sub_params = [
+      ['-link-', redirect_link]      
+    ];
+
+        Email.sendMail(req.body.email, 'New user signed up', sub_params, 'user-registered', function (err) {
+        });
+      res.status(201).send({
+        status: 'ok',
+        message: 'Successfully registered',
+        results: saved_user
+      });
+    }
+  }).catch(function (err) {
     var error = new Error();
     error.name = 'MongoSaveError';
     error.message = err.message;
+    if (!_.isUndefined(err.errors) && !_.isUndefined(err.errors.email)) {
+      error.name = 'DuplicateEmailError';
+      error.message = err.errors.email.message;
+    }
     return next(error);
   });
-          }
-              
-    });
+   
   } else {
     var error = new Error();
     error.name = 'MissingParamsError';
@@ -147,7 +151,7 @@ if (req.body && req.body.email && req.body.username && req.body.password) {
       if (!user.isActive) {
         var error = new Error();
         error.name = 'Forbidden';
-        error.message = 'Your account is pending approval';
+        error.message = 'Your account is not active, please check your e-mail';
         return next(error);
       } else {
         if (bcryptjs.compareSync(req.body.password, user.password)) {

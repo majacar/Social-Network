@@ -6,9 +6,16 @@
 var sendgrid = require('sendgrid')(process.env.SENDGRID_KEY);
 
 var templates = [
+{
+    name: 'user-registered',
+    id: '79b3b732-fa28-4554-94da-e08217becab4',
+    from_mail: 'no-reply@social_network.com',
+    fromname: 'Social Network',
+    subject: 'Welcome to Social Network!',
+  },
   {
     name: 'forgot-password',
-    id: '80f5a606-5805-4ce9-adde-a7583cb5b819',
+    id: '7af99556-b7eb-483e-8361-03dbc2f60b6b',
     from_mail: 'no-reply@social_network.com',
     fromname: 'Social Network',
     subject: 'Create your new Social Network password',
