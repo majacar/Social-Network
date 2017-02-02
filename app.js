@@ -28,6 +28,7 @@ var app = express();
 // router and controllers
 var router = express.Router();
 var UsersController = require('./routes/users');
+var ProfileController = require('./routes/profile');
 
 // include in the app
 app.use(config.cors);
@@ -93,7 +94,9 @@ router
   .post('/signup', UsersController.signup)
   .post('/signin', UsersController.signin)
   .post('/forgot', UsersController.forgotPassword)
-  .post('/reset', UsersController.resetPassword);
+  .post('/reset', UsersController.resetPassword)
+  .get('/me', AuthCheck.ensureAuth, ProfileController.me)
+  .get('/profile/:_id', AuthCheck.ensureAuth, ProfileController.profile);
 
 app.use('/api/v1', router);
 
