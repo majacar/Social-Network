@@ -77,7 +77,7 @@ module.exports.profile = function (req, res, next) {
       if (!user.isActive) {
         var error = new Error();
         error.name = 'Forbidden';
-        error.message = 'Ypur account is inactive';
+        error.message = 'Account is inactive';
         return next(error);
       }
 
