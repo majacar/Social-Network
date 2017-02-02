@@ -1,5 +1,5 @@
 /**
- * Module for sending mails
+ * Module for sending mails - Sendgrid
  * @type {exports}
  */
 
@@ -15,7 +15,7 @@ var templates = [
   },
   {
     name: 'forgot-password',
-    id: '7af99556-b7eb-483e-8361-03dbc2f60b6b',
+    id: '0c2348f8-e4bf-4aa3-96db-841d1d517dfc',
     from_mail: 'no-reply@social_network.com',
     fromname: 'Social Network',
     subject: 'Create your new Social Network password',
