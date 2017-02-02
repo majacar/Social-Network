@@ -1,5 +1,5 @@
 /**
- * Module for sending mails
+ * Module for sending mails - Sendgrid
  * @type {exports}
  */
 
