@@ -16,6 +16,7 @@ var User = new Schema({
   date_created: { type: Date, default: Date.now },
   tmp: { type: String },
   tmp_expiry: { type: Date },
+  image: String,
 }, { versionKey: false });
 
 User.path('email').validate(function (email) {
