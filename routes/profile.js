@@ -9,7 +9,8 @@ var config = require('../config');
 var User = require('../models/user');
 var slug = require('slug');
 var shortid = require('shortid');
-var utils = require('../config/utils');
+var utils = require('../config/utils')
+var Image = require('../models/image');
 
 /*
  * @api {get} /me My profile
@@ -117,9 +118,10 @@ module.exports.profile = function (req, res, next) {
     "_id": "5895fbcb60a95e49c59a8cdd",
     "fullName": "Lepa Brena",
     "password": "$2a$10$5uBTpTujBgY41MtGuIq5pe1sgjwGenfYn9Bhvb1ZH23FpTyKiwVfm",
-    "username": "brena",
+    "username": "maja",
     "email": "brena@yahoo.com",
-    "image": "https://s3.amazonaws.com/soundhills/a0ac4885-4daf-4491-b176-ed847ca99c75.png",
+    "gallery": [],
+    "image": [],
     "date_created": "2017-02-04T16:05:31.792Z",
     "isActive": true
   }
@@ -128,61 +130,162 @@ module.exports.profile = function (req, res, next) {
 
 module.exports.edit = function (req, res, next) {
     if (req.params && req.user._id) {
-      User.findOne({ _id: req.user._id }).exec().then(function (user) {
-      
-        // email and username can not be changed
-            delete req.body.email;
-            delete req.body.username;
 
-            var updateSet = req.body;
-            if (!_.isUndefined(req.body.img) && !_.isUndefined(req.body.img.type) && !_.isUndefined(req.body.img.image)) {
-              utils.resizeUploadImage(req.body.img, config.maxImageSize(), config.amazonS3().bucket, function (err, url) {
+       // email and username can not be changed
+          delete req.body.email;
+          delete req.body.username; 
+
+      User.findOneAndUpdate({ _id: req.user._id }, req.body, { new: true }, function (err, user) {
+        if (err) {
+           var error = new Error();
+            error.name = 'MongoSaveError';
+            error.message = err.message;
+            return next(error);
+        } else {         
+            res.status(201).send({
+                  status: 'ok',
+                  message: 'Successfully updated',
+                  results: user
+                });   
+              }                          
+           });
+      } else {
+        var error = new Error();
+        error.name = 'MissingParamsError';
+        return next(error);
+    }         
+  };
+
+  /**
+ * @api {post} /backgroundImage
+ * @apiVersion 1.0.0
+ * @apiDescription Change background image
+ * @apiGroup Profile
+ *
+ * @apiRequest:
+ {
+"image": {
+  "description": "My picture",
+  "data": {
+    "type": "png",
+    "base": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+  }
+}
+}
+ *
+ * @apiSuccessExample Success-Response:
+ HTTP/1.1 201 OK
+ {
+  "status": "ok",
+  "results": {
+    "__v": 0,
+    "updatedAt": "2017-02-04T20:18:53.676Z",
+    "createdAt": "2017-02-04T20:18:53.676Z",
+    "description": "My picture",
+    "url": "https://s3.amazonaws.com/soundhills/d83251ab-3067-4b56-a1d9-c9af00054086.png",
+    "creator": "589635327afc4f5af6d10403",
+    "_id": "5896372d6ed9b65c29f400ac"
+  }
+}
+ */
+
+  module.exports.backgroundImage = function (req, res, next) {
+        if (req.body && req.body.image) {
+          utils.uploadImage(req.body.image.data, config.amazonS3().bucket, function (err, url) {
                 if (err) return next(err);
-                updateSet.image = url;
-                updateUser(user._id, updateSet, function (err, user) {
-                  if (err) return next(err);
+                var imageData = {
+                  description: req.body.image.description,
+                  url: url,
+                  creator: req.user._id
+                };
+                var image = new Image(imageData);
+                image.save(function (err, data) {
+                  if (err) {
+                    var error = new Error();
+                    error.name = 'MongoSaveError';
+                    error.message = err.message;
+                    return next(error);
+                  } else {
+
+                    User.update({ _id: req.user._id }, { $addToSet: { gallery: data._id } }).exec(function (err, user) {
+                      if (err) {
+                        var error = new Error();
+                        error.name = 'MongoSaveError';
+                        error.message = err.message;
+                        return next(error);
+                      } else {
+                        res.status(201).send({
+                          status: 'ok',
+                          results: data
+                        });
+                      }
+                    });
+
+                  }
+                });
+              });
+            } else {
+              var error = new Error();
+              error.name = 'MissingParamsError';
+              return next(error);
+            }
+          };
+
+/**
+ * @api {post} /profilePicture
+ * @apiVersion 1.0.0
+ * @apiDescription Add profile picture - Avatar
+ * @apiGroup Profile
+ *
+ * @apiRequest:
+ {  
+  "image": {
+  "type": "png",
+  "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+  }
+}
+ *
+ * @apiSuccessExample Success-Response:
+ HTTP/1.1 201 OK
+{
+  "status": "ok",
+  "message": "Successfully updated",
+  "results": {
+    "_id": "589635327afc4f5af6d10403",
+    "fullName": "Brena",
+    "password": "$2a$10$aNGwWVlgDMN3y7gyLE3UyeLWblWqtdgxF3EnvV5SyG76lxloI5Tqa",
+    "username": "brena",
+    "email": "brena@yahoo.com",
+    "image": "https://s3.amazonaws.com/soundhills/2dc458cc-5234-4e6a-80d4-8af28ebd18f0.png",
+    "gallery": [],
+    "date_created": "2017-02-04T20:10:26.276Z",
+    "isActive": true
+  }
+}
+ */
+
+  module.exports.profilePicture = function (req, res, next) {
+     if (!_.isUndefined(req.body.image) && !_.isUndefined(req.body.image.type) && !_.isUndefined(req.body.image.image)) {
+        utils.resizeUploadImage(req.body.image, config.maxImageSize(), config.amazonS3().bucket, function (err, url) {
+                if (err) return next(err);
+                User.findOneAndUpdate({ _id: req.user._id }, { image: url }, { new: true }, function (err, user) {
+                      if (err) {
+                        var error = new Error();
+                        error.name = 'MongoSaveError';
+                        error.message = err.message;
+                        return next(error);
+                      } else {
                   res.status(201).send({
                         status: 'ok',
                         message: 'Successfully updated',
                         results: user
                       });
+                   }
                 });
               });
             } else {
-              updateUser(user._id, updateSet, function (err, user) {
-                if (err) return next(err);
-                res.status(201).send({
-                      status: 'ok',
-                      message: 'Successfully updated',
-                      results: user
-                    });
-              });
+              var error = new Error();
+              error.name = 'MissingParamsError';
+              return next(error);
             }
-          }).catch(function (err) {
-            var error = new Error();
-            error.name = 'MongoSaveError';
-            error.message = err.message;
-            return next(error);
-          });
-    } else {
-      var error = new Error();
-      error.name = 'MissingParamsError';
-      return next(error);
-    }         
-  };
-
-// Helper function
-
-   function updateUser(user_id, updateSet, cb) {
-              User.findOneAndUpdate({ _id: user_id }, updateSet, { new: true }, function (err, savedUser) {
-                if (err) {
-                  var error = new Error();
-                  error.name = 'MongoSaveError';
-                  error.message = err.message;
-                  return cb(error, null);
-                } else {
-                  delete savedUser.password;
-                  return cb(null, savedUser);
-                }
-              });
-            }
+          };               

@@ -88,22 +88,22 @@ module.exports.isValidObjectID = function (check_value) {
   return checkForHexRegExp.test(check_value);
 };
 
-function resizeUploadImage(img, resize, bucket, cb) {
+function resizeUploadImage(image, resize, bucket, cb) {
   var allowed_types = ['jpg', 'jpeg', 'png'];
 
-  if (allowed_types.indexOf(img.type.toLocaleLowerCase()) === -1) {
+  if (allowed_types.indexOf(image.type.toLocaleLowerCase()) === -1) {
     var error = new Error();
     error.name = 'InvalidImageType';
     return cb(error);
   }
-  sharp(new Buffer(img.image, 'base64')).resize(resize.width, resize.height).max().withoutEnlargement().sharpen().quality(config.maxImageSize().quality).toBuffer(function (err, resized_img) {
+  sharp(new Buffer(image.image, 'base64')).resize(resize.width, resize.height).max().withoutEnlargement().sharpen().quality(config.maxImageSize().quality).toBuffer(function (err, resized_img) {
     if (err) {
       var error = new Error();
       error.name = 'UploadImageError';
       error.message = err.message;
       return cb(error);
     }
-    decodeBase64AndSaveToFS(resized_img.toString('base64'), img.type, function (err, file_path) {
+    decodeBase64AndSaveToFS(resized_img.toString('base64'), image.type, function (err, file_path) {
       if (err) {
         var error = new Error();
         error.name = 'UploadImageError';
@@ -111,7 +111,7 @@ function resizeUploadImage(img, resize, bucket, cb) {
         return cb(error);
       }
       if (process.env.NODE_ENV == 'test') {
-        return cb(err, 'http://www.google.com/' + uuid.v4() + '.' + img.type);
+        return cb(err, 'http://www.google.com/' + uuid.v4() + '.' + image.type);
       }
       uploadFileToS3(file_path, bucket, function (err, image_url) {
         if (err) {
@@ -126,33 +126,33 @@ function resizeUploadImage(img, resize, bucket, cb) {
   });
 }
 
-function uploadTrack(track, bucket, cb) {
-  var allowed_types = ['mp3', 'mpeg'];
+function uploadImage(image, bucket, cb) {
+  var allowed_types = ['jpg', 'jpeg', 'png'];
 
-  if (allowed_types.indexOf(track.type.toLocaleLowerCase()) === -1) {
+  if (allowed_types.indexOf(image.type.toLocaleLowerCase()) === -1) {
     var error = new Error();
-    error.name = 'InvalidTrackType';
+    error.name = 'InvalidImageType';
     return cb(error);
   }
 
-  decodeBase64AndSaveToFS(track.base, track.type, function (err, file_path) {
+  decodeBase64AndSaveToFS(image.base, image.type, function (err, file_path) {
     if (err) {
       var error = new Error();
-      error.name = 'UploadTrackError';
+      error.name = 'UploadImageError';
       error.message = err.message;
       return cb(error);
     }
     if (process.env.NODE_ENV == 'test') {
-      return cb(err, 'www.google.com/' + uuid.v4() + track.type);
+      return cb(err, 'www.google.com/' + uuid.v4() + image.type);
     }
-    uploadFileToS3(file_path, bucket, function (err, track_url) {
+    uploadFileToS3(file_path, bucket, function (err, image_url) {
       if (err) {
         var error = new Error();
         error.message = err.message;
-        error.name = 'UploadTrackError';
+        error.name = 'UploadImageError';
         return cb(error);
       }
-      return cb(null, track_url);
+      return cb(null, image_url);
     });
   });
 }
@@ -182,5 +182,5 @@ function removeFile(url, bucket, cb) {
 exports.uploadFileToS3 = uploadFileToS3;
 exports.decodeBase64AndSaveToFS = decodeBase64AndSaveToFS;
 exports.resizeUploadImage = resizeUploadImage;
-exports.uploadTrack = uploadTrack;
+exports.uploadImage = uploadImage;
 exports.removeFile = removeFile;

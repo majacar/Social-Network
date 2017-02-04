@@ -5,6 +5,7 @@
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var Image = require('../models/image');
 
 var User = new Schema({
   email: { type: String, required: true, unique: true },
@@ -16,6 +17,7 @@ var User = new Schema({
   date_created: { type: Date, default: Date.now },
   tmp: { type: String },
   tmp_expiry: { type: Date },
+  gallery: [{ type: Schema.ObjectId, ref: 'Image' }],
   image: String,
 }, { versionKey: false });
 
