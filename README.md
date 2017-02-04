@@ -1,6 +1,5 @@
 # Social-Network API #
-Node.js + MongoDB
-* Social network like Facebook
+Node.js + MongoDB, Social network like Facebook
 
 ## Stack
 * Node.js
