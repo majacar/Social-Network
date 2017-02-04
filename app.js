@@ -97,7 +97,9 @@ router
   .post('/reset', UsersController.resetPassword)
   .get('/me', AuthCheck.ensureAuth, ProfileController.me)
   .get('/profile/:_id', AuthCheck.ensureAuth, ProfileController.profile)
-  .put('/profile/edit/:id', AuthCheck.ensureAuth, ProfileController.edit);
+  .put('/edit/:id', AuthCheck.ensureAuth, ProfileController.edit)
+  .post('/backgroundImage', AuthCheck.ensureAuth, ProfileController.backgroundImage)
+  .post('/profilePicture', AuthCheck.ensureAuth, ProfileController.profilePicture);
 
 app.use('/api/v1', router);
 
