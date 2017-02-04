@@ -81,3 +81,19 @@ module.exports.cors = function (req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   next();
 };
+
+module.exports.amazonS3 = function () {
+  return {
+    accessKeyId: process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET,
+    bucket: process.env.S3_BUCKET,
+    docs_bucket: process.env.S3_DOCS_BUCKET
+  };
+};
+
+module.exports.maxImageSize = function () {
+  return {
+    profile: {height: 450, width: 450},
+    quality: 65
+  };
+};

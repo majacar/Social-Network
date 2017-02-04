@@ -96,7 +96,8 @@ router
   .post('/forgot', UsersController.forgotPassword)
   .post('/reset', UsersController.resetPassword)
   .get('/me', AuthCheck.ensureAuth, ProfileController.me)
-  .get('/profile/:_id', AuthCheck.ensureAuth, ProfileController.profile);
+  .get('/profile/:_id', AuthCheck.ensureAuth, ProfileController.profile)
+  .put('/profile/edit/:id', AuthCheck.ensureAuth, ProfileController.edit);
 
 app.use('/api/v1', router);
 
