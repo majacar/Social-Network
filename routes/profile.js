@@ -9,7 +9,7 @@ var config = require('../config');
 var User = require('../models/user');
 var slug = require('slug');
 var shortid = require('shortid');
-var utils = require('../config/utils')
+var utils = require('../config/utils');
 var Image = require('../models/image');
 
 /*
