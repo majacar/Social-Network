@@ -99,7 +99,8 @@ router
   .get('/profile/:_id', AuthCheck.ensureAuth, ProfileController.profile)
   .put('/edit/:id', AuthCheck.ensureAuth, ProfileController.edit)
   .post('/backgroundImage', AuthCheck.ensureAuth, ProfileController.backgroundImage)
-  .post('/profilePicture', AuthCheck.ensureAuth, ProfileController.profilePicture);
+  .post('/profilePicture', AuthCheck.ensureAuth, ProfileController.profilePicture)
+  .get('/pictures/:userid', AuthCheck.ensureAuth, ProfileController.pictures);
 
 app.use('/api/v1', router);
 

@@ -9,7 +9,7 @@ var config = require('../config');
 var User = require('../models/user');
 var slug = require('slug');
 var shortid = require('shortid');
-var utils = require('../config/utils')
+var utils = require('../config/utils');
 var Image = require('../models/image');
 
 /*
@@ -130,6 +130,13 @@ module.exports.profile = function (req, res, next) {
 
 module.exports.edit = function (req, res, next) {
     if (req.params && req.user._id) {
+
+      if (!user) {
+        var error = new Error();
+        error.name = 'Forbidden';
+        error.message = 'Account is inactive';
+        return next(error);
+      }
 
        // email and username can not be changed
           delete req.body.email;
@@ -289,3 +296,44 @@ module.exports.edit = function (req, res, next) {
               return next(error);
             }
           };               
+
+/*
+ * @api {get} /pictures/:userid
+ * @apiDescription View list of images from gallery
+ * @apiGroup Images
+ *
+ * @apiSuccessExample Success-Response:
+  HTTP/1.1 200 OK
+{
+  "status": "ok",
+  "results": [
+    {
+      "_id": "5896372d6ed9b65c29f400ac",
+      "updatedAt": "2017-02-04T20:18:53.676Z",
+      "createdAt": "2017-02-04T20:18:53.676Z",
+      "description": "My picture",
+      "url": "https://s3.amazonaws.com/soundhills/d83251ab-3067-4b56-a1d9-c9af00054086.png",
+      "creator": "589635327afc4f5af6d10403",
+      "__v": 0
+    }
+  ]
+}
+*/
+
+module.exports.pictures = function (req, res, next) {
+    if (req.params && req.params.userid) {
+      Image.find({ creator: req.params.userid }).sort({ createdAt: 'descending' }).exec(function (err, images) {
+        if (err) {
+          var error = new Error();
+          error.name = 'MongoSaveError';
+          error.message = err.message;
+          return next(error);
+        } else {
+          res.status(200).send({
+            status: 'ok',
+            results: images
+          });
+        }
+      });
+    }
+  };
