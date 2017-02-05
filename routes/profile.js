@@ -131,6 +131,13 @@ module.exports.profile = function (req, res, next) {
 module.exports.edit = function (req, res, next) {
     if (req.params && req.user._id) {
 
+      if (!user) {
+        var error = new Error();
+        error.name = 'Forbidden';
+        error.message = 'Account is inactive';
+        return next(error);
+      }
+
        // email and username can not be changed
           delete req.body.email;
           delete req.body.username; 
