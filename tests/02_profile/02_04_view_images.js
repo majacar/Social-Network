@@ -11,7 +11,7 @@ var imageHelper = require('../helpers/image');
 
 describe('View images from gallery', function () {
 
-  it('GET /pictures Should return list of my pictures', function (done) {
+  it('GET /pictures Should return list of my pictures from gallery', function (done) {
      userHelper.register_user(function (result) {
       imageHelper.create_image(result.token, function (image) {
 
@@ -35,7 +35,7 @@ describe('View images from gallery', function () {
   });
 
 
-  it('GET /pictures Should return list of other user pictures', function (done) {
+  it('GET /pictures Should return list of other user pictures from gallery', function (done) {
      userHelper.register_user(function (result1) {
      userHelper.register_user(function (result2) {
 
