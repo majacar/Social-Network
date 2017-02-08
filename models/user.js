@@ -6,6 +6,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Image = require('../models/image');
+var Post = require('../models/post');
 
 var User = new Schema({
   email: { type: String, required: true, unique: true },
@@ -19,6 +20,7 @@ var User = new Schema({
   tmp_expiry: { type: Date },
   gallery: [{ type: Schema.ObjectId, ref: 'Image' }],
   image: String,
+  wall: [{ type: Schema.ObjectId, ref: 'Post' }],
 }, { versionKey: false });
 
 User.path('email').validate(function (email) {

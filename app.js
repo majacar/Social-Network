@@ -29,6 +29,7 @@ var app = express();
 var router = express.Router();
 var UsersController = require('./routes/users');
 var ProfileController = require('./routes/profile');
+var PostController = require('./routes/posts');
 
 // include in the app
 app.use(config.cors);
@@ -100,7 +101,8 @@ router
   .put('/edit/:id', AuthCheck.ensureAuth, ProfileController.edit)
   .post('/backgroundImage', AuthCheck.ensureAuth, ProfileController.backgroundImage)
   .post('/profilePicture', AuthCheck.ensureAuth, ProfileController.profilePicture)
-  .get('/pictures/:userid', AuthCheck.ensureAuth, ProfileController.pictures);
+  .get('/pictures/:userid', AuthCheck.ensureAuth, ProfileController.pictures)
+  .post('/post/:userid', AuthCheck.ensureAuth, PostController.post);
 
 app.use('/api/v1', router);
 
