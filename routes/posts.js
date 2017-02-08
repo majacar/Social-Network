@@ -38,6 +38,7 @@ var Post = require('../models/post');
 }
 */
 
+
 module.exports.post = function (req, res, next) {
   if (req.body && req.params && req.params.userid) {
     User.findOne({ _id: req.params.userid }).lean().exec(function (err, user) {
@@ -56,21 +57,21 @@ module.exports.post = function (req, res, next) {
           }
 
           if (user) {
-            var updateSet = req.body;
-            function updateUser(userid, updateSet, cb) {
-              User.findOneAndUpdate({ _id: req.params.userid }, updateSet, { $addToSet: { wall: post._id } }).exec(function (err, user) {
-                        if (err) {
-                          var error = new Error();
-                          error.name = 'MongoSaveError';
-                          error.message = err.message;
-                          return next(error);
-                        } else {
-                          return cb(null, data);
-                        }
-                      });
+            var post = new Post();
+            var updateSet = { $addToSet: { wall: post._id }};
+            function updateUser(user_id, updateSet, cb) {
+              User.findOneAndUpdate({ _id: req.params.userid }, updateSet, { new: true }, function (err, savedUser) {
+                if (err) {
+                  var error = new Error();
+                  error.name = 'MongoSaveError';
+                  error.message = err.message;
+                  return cb(error, null);
+                } else {
+                  return cb(null, savedUser);
+                }
+              });
             }
 
-            var post = new Post();
             if (!_.isUndefined(req.body.text)) {
               post.text = req.body.text;
 
@@ -81,11 +82,14 @@ module.exports.post = function (req, res, next) {
                       error.message = err.message;
                       return next(error);
                     } else {
+                  updateUser(user._id, updateSet, function (err, data) {
+                  if (err) return next(err);
                       res.status(201).send({
                             status: 'ok',
-                            results: data
+                            results: post
                           });
-                    }
+                    });
+                     }
                   });
             } else {
               if (!_.isUndefined(req.body.image) && !_.isUndefined(req.body.image.type) && !_.isUndefined(req.body.image.image)) {
@@ -99,11 +103,14 @@ module.exports.post = function (req, res, next) {
                       error.message = err.message;
                       return next(error);
                     } else {
+                       updateUser(user._id, updateSet, function (err, data) {
+                  if (err) return next(err);
                       res.status(201).send({
                             status: 'ok',
-                            results: data
+                            results: post
                           });
-                    }
+                    });
+                     }
                   });
                 });
               }
