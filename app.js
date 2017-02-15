@@ -102,7 +102,8 @@ router
   .post('/backgroundImage', AuthCheck.ensureAuth, ProfileController.backgroundImage)
   .post('/profilePicture', AuthCheck.ensureAuth, ProfileController.profilePicture)
   .get('/pictures/:userid', AuthCheck.ensureAuth, ProfileController.pictures)
-  .post('/post/:userid', AuthCheck.ensureAuth, PostController.post);
+  .post('/post/:userid', AuthCheck.ensureAuth, PostController.post)
+  .post('/post', AuthCheck.ensureAuth, PostController.post);
 
 app.use('/api/v1', router);
 
