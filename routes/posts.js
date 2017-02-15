@@ -140,10 +140,10 @@ module.exports.post = function (req, res, next) {
   "status": "ok",
   "results": {
     "__v": 0,
-    "updatedAt": "2017-02-08T19:44:53.338Z",
-    "createdAt": "2017-02-08T19:44:53.338Z",
-    "text": "Hello!!!",
-    "_id": "589b7535bfe2f61bb730ecae"
+    "updatedAt": "2017-02-15T14:33:40.903Z",
+    "createdAt": "2017-02-15T14:33:40.903Z",
+    "image": "https://s3.amazonaws.com/socialnetwork/bfea7a4d-2b09-4b38-857d-ab5494814818.png",
+    "_id": "58a466c4e316b90f67c439fa"
   }
 }
 }
