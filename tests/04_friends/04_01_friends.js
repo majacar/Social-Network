@@ -22,7 +22,7 @@ describe('Send friend request and Add user to Friends', function () {
       .send({
           userid: result2.user._id
         })
-      .expect(201)
+      .expect(200)
       .end(function (err, res) {
           if (err) {
             throw err;
@@ -84,7 +84,7 @@ describe('Send friend request and Add user to Friends', function () {
       .send({
           userid: result2.user._id
         })
-      .expect(201)
+      .expect(200)
       .end(function (err, res) {
           if (err) {
             throw err;
