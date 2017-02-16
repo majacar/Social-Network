@@ -164,3 +164,47 @@ module.exports.friends = function (req, res, next) {
         }
       });
   };
+
+  /*
+ * @api {get} /friends/:userid
+ * @apiDescription View list of my friends
+ * @apiGroup Friends
+ *
+ * @apiSuccessExample Success-Response:
+  HTTP/1.1 200 OK
+{
+ "status": "ok",
+"results": [
+    {
+      "_id": "5849806f02eb617f5ae282c6",
+      "name": "Song",
+      "description": "Song",
+      "category": "guitar",
+      "url": "https://s3.amazonaws.com/soundhills/8903270a-e788-4cfb-9067-608114edce42.mp3",
+      "creator": "5849802802eb617f5ae282c5",
+      "__v": 0
+    }
+  ]
+*/
+
+module.exports.user_friends = function (req, res, next) {
+  if (req.params && req.params.userid) {
+      User.findOne({ _id: req.params.userid }).populate('friends', 'username image').exec(function (err, user) {
+        if (err) {
+          var error = new Error();
+          error.name = 'MongoSaveError';
+          error.message = err.message;
+          return next(error);
+        } else {
+          res.status(200).send({
+            status: 'ok',
+            results: user.friends
+          });
+        }
+      });
+    } else {
+      var error = new Error();
+      error.name = 'MissingParamsError';
+      return next(error);
+    }
+  };

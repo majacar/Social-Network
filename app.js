@@ -107,7 +107,8 @@ router
   .post('/post', AuthCheck.ensureAuth, PostController.post)
   .post('/sendFriendRequest', AuthCheck.ensureAuth, FriendsController.sendFriendRequest)
   .post('/addToFriends', AuthCheck.ensureAuth, FriendsController.addToFriends)
-  .get('/friends', AuthCheck.ensureAuth, FriendsController.friends);
+  .get('/friends', AuthCheck.ensureAuth, FriendsController.friends)
+  .get('/friends/:userid', AuthCheck.ensureAuth, FriendsController.user_friends);
 
 app.use('/api/v1', router);
 
