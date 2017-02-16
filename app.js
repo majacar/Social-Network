@@ -30,6 +30,7 @@ var router = express.Router();
 var UsersController = require('./routes/users');
 var ProfileController = require('./routes/profile');
 var PostController = require('./routes/posts');
+var FriendsController = require('./routes/friends');
 
 // include in the app
 app.use(config.cors);
@@ -103,7 +104,8 @@ router
   .post('/profilePicture', AuthCheck.ensureAuth, ProfileController.profilePicture)
   .get('/pictures/:userid', AuthCheck.ensureAuth, ProfileController.pictures)
   .post('/post/:userid', AuthCheck.ensureAuth, PostController.post)
-  .post('/post', AuthCheck.ensureAuth, PostController.post);
+  .post('/post', AuthCheck.ensureAuth, PostController.post)
+  .post('/sendFriendRequest', AuthCheck.ensureAuth, FriendsController.sendFriendRequest);
 
 app.use('/api/v1', router);
 
