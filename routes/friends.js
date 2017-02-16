@@ -54,7 +54,7 @@ module.exports.sendFriendRequest = function (req, res, next) {
               return next(error);
             }
 
-            var friends = req.user.friends.map(function (b) {
+             var friends = req.user.friends.map(function (b) {
               return b.toString();
             });
 
@@ -126,4 +126,3 @@ module.exports.addToFriends = function (req, res, next) {
     return next(error);
   }
 };
-
