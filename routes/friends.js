@@ -126,3 +126,4 @@ module.exports.addToFriends = function (req, res, next) {
     return next(error);
   }
 };
+
