@@ -108,7 +108,9 @@ router
   .post('/sendFriendRequest', AuthCheck.ensureAuth, FriendsController.sendFriendRequest)
   .post('/addToFriends', AuthCheck.ensureAuth, FriendsController.addToFriends)
   .get('/friends', AuthCheck.ensureAuth, FriendsController.friends)
-  .get('/friends/:userid', AuthCheck.ensureAuth, FriendsController.user_friends);
+  .get('/friends/:userid', AuthCheck.ensureAuth, FriendsController.user_friends)
+  .post('/block', AuthCheck.ensureAuth, UsersController.block)
+  .post('/unblock', AuthCheck.ensureAuth, UsersController.unblock);
 
 app.use('/api/v1', router);
 

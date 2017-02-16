@@ -25,6 +25,7 @@ var User = new Schema({
   friendsCount: Number,
   friendRequests: [{ type: Schema.ObjectId, ref: 'User' }],
   sentRequests: [{ type: Schema.ObjectId, ref: 'User' }],
+  block: [{ type: Schema.ObjectId, ref: 'User' }],
 }, { versionKey: false });
 
 User.path('email').validate(function (email) {
