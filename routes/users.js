@@ -294,7 +294,7 @@ module.exports.forgotPassword = function (req, res, next) {
     "updatedAt": "2016-11-11T17:26:35.949Z",
     "createdAt": "2016-11-09T12:46:57.733Z",
     "username": "maja",
-    "email": "maja@soundhills.com",
+    "email": "maja@yahoo.com",
     "isActive": true
   }
 }
@@ -355,3 +355,96 @@ module.exports.resetPassword = function (req, res, next) {
     return next(error);
   }
 };
+
+/*
+  * @api {post} /block Block user
+  * @apiVersion 1.0.0
+  * @apiDescription Block user
+  * @apiGroup User
+  *
+  * @apiParam {String} userid  Users userid.
+  *
+  * @apiSuccessExample Success-Response:
+   HTTP/1.1 200 OK
+   {
+  "status": "ok",
+  "message": "Successfully blocked"
+}
+*/
+
+module.exports.block = function (req, res, next) {
+    if (req.body && req.body.userid) {
+      if (req.user._id == req.body.userid) {
+              var error = new Error();
+              error.name = 'NotAcceptable';
+              error.message = 'Not acceptable';
+              return next(error);
+            } 
+        User.count({ friends: req.body.userid }).exec(function (err, count) {
+              if (err) {
+                var error = new Error();
+                error.name = 'MongoSaveError';
+                error.message = err.message;
+                return next(error);
+              }  else {
+                 User.update({ _id: req.user._id }, { $addToSet: { block: req.body.userid }, $pull: { friends: req.body.userid }, friendsCount: count }, function (err, user) {
+                    if (err) {
+                      var error = new Error();
+                      error.name = 'MongoSaveError';
+                      error.message = err.message;
+                      return next(error);
+                    } else {
+                      User.update({ _id: req.body.userid }, { $pull: { friends: req.user._id }, friendsCount: count }).exec(function (err, user) {
+                        res.status(200).send({
+                          status: 'ok',
+                          message: 'Successfully blocked'
+                        });
+                      });
+                    }
+                  });
+              }
+            });
+    } else {
+      var error = new Error();
+      error.name = 'MissingParamsError';
+      return next(error);
+    }
+  };
+
+/*
+  * @api {post} /unblock Unblock user
+  * @apiVersion 1.0.0
+  * @apiDescription Unblock user
+  * @apiGroup User
+  *
+  * @apiParam {String} userid  Users userid.
+  *
+  * @apiSuccessExample Success-Response:
+    HTTP/1.1 200 OK
+    {
+  "status": "ok",
+  "message": "Successfully unblock"
+}
+*/
+
+module.exports.unblock = function (req, res, next) {
+      if (req.body && req.body.userid) {
+        User.update({ _id: req.user._id }, { $pull: { block: req.body.userid } }, function (err) {
+              if (err) {
+                var error = new Error();
+                error.name = 'MongoSaveError';
+                error.message = err.message;
+                return next(error);
+              } else {
+                res.status(200).send({
+                      status: 'ok',
+                      message: 'Successfully unblocked'
+                    });
+              }
+            });
+      } else {
+        var error = new Error();
+        error.name = 'MissingParamsError';
+        return next(error);
+      }
+    };

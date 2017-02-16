@@ -83,6 +83,18 @@ module.exports.profile = function (req, res, next) {
         return next(error);
       }
 
+      if (user && user.block) {
+        var block = user.block.map(function(b) {
+          return b.toString();
+        });
+        if (block.includes(req.user._id.toString())) {
+          var error = new Error();
+          error.name = 'Forbidden';
+          error.message = 'You are blocked';
+          return next(error);
+        }
+      }
+
        if (user) {
         delete user.password;
         delete user.email;
