@@ -294,7 +294,7 @@ module.exports.forgotPassword = function (req, res, next) {
     "updatedAt": "2016-11-11T17:26:35.949Z",
     "createdAt": "2016-11-09T12:46:57.733Z",
     "username": "maja",
-    "email": "maja@soundhills.com",
+    "email": "maja@yahoo.com",
     "isActive": true
   }
 }
