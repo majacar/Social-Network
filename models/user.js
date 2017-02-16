@@ -21,6 +21,10 @@ var User = new Schema({
   gallery: [{ type: Schema.ObjectId, ref: 'Image' }],
   image: String,
   wall: [{ type: Schema.ObjectId, ref: 'Post' }],
+  friends: [{ type: Schema.ObjectId, ref: 'User' }],
+  friendsCount: Number,
+  friendRequests: [{ type: Schema.ObjectId, ref: 'User' }],
+  sentRequests: [{ type: Schema.ObjectId, ref: 'User' }],
 }, { versionKey: false });
 
 User.path('email').validate(function (email) {
