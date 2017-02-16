@@ -22,6 +22,7 @@ var User = new Schema({
   image: String,
   wall: [{ type: Schema.ObjectId, ref: 'Post' }],
   friends: [{ type: Schema.ObjectId, ref: 'User' }],
+  friendsCount: Number,
   friendRequests: [{ type: Schema.ObjectId, ref: 'User' }],
   sentRequests: [{ type: Schema.ObjectId, ref: 'User' }],
 }, { versionKey: false });
