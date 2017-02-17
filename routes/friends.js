@@ -11,6 +11,8 @@ var slug = require('slug');
 var shortid = require('shortid');
 var utils = require('../config/utils');
 var Image = require('../models/image');
+var eventEmitter = require('events');
+var emitter = new eventEmitter();
 
 /*
  * @api {post} /sendFriendRequest
@@ -66,6 +68,7 @@ module.exports.sendFriendRequest = function (req, res, next) {
             }
 
             User.update({ _id: req.user._id }, { $addToSet: { sentRequests: req.body.userid } }).exec(function (err, user) {
+                emitter.emit('sendFriendRequest');
                 res.status(200).send({
                   status: 'ok',
                   message: 'Friend request was sent'
@@ -78,6 +81,37 @@ module.exports.sendFriendRequest = function (req, res, next) {
     error.name = 'MissingParamsError';
     return next(error);
   }
+};
+
+/*
+ * @api {get} /sendFriendRequest/stream
+ * @apiVersion 1.0.0
+ * @apiDescription Emit new notification
+ * @apiGroup Friends
+ *
+ */
+
+module.exports.stream = function (req, res, next) {
+  req.socket.setTimeout(0);
+
+  emitter.on('sendFriendRequest', function () {
+     
+        res.write('New friend request');  
+      
+  });
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  res.write('\n');
+
+  req.on("close", function () {
+    console.log('close')
+  });
+
 };
 
 /*
