@@ -106,6 +106,7 @@ router
   .post('/post/:userid', AuthCheck.ensureAuth, PostController.post)
   .post('/post', AuthCheck.ensureAuth, PostController.post)
   .post('/sendFriendRequest', AuthCheck.ensureAuth, FriendsController.sendFriendRequest)
+  .get('/sendFriendRequest/stream', AuthCheck.ensureAuth, FriendsController.stream)
   .post('/addToFriends', AuthCheck.ensureAuth, FriendsController.addToFriends)
   .get('/friends', AuthCheck.ensureAuth, FriendsController.friends)
   .get('/friends/:userid', AuthCheck.ensureAuth, FriendsController.user_friends)
