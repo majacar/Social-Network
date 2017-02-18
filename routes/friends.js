@@ -30,7 +30,7 @@ var emitter = new eventEmitter();
 
 module.exports.sendFriendRequest = function (req, res, next) {
   if (req.body && req.body.userid) {
-    User.update({ _id: req.body.userid }, { $addToSet: { friendRequests: req.user._id } }, function (err, user) {
+    User.findOneAndUpdate({ _id: req.body.userid }, { $addToSet: { friendRequests: req.user._id } }, { new: true }).exec(function (err, user) {
           if (err) {
             var error = new Error();
             error.name = 'MongoSaveError';
@@ -67,7 +67,7 @@ module.exports.sendFriendRequest = function (req, res, next) {
               return next(error);
             }
 
-            User.update({ _id: req.user._id }, { $addToSet: { sentRequests: req.body.userid } }).exec(function (err, user) {
+            User.findOneAndUpdate({ _id: req.user._id }, { $addToSet: { sentRequests: req.body.userid } }, { new: true }).exec(function (err, user) {
                 emitter.emit('sendFriendRequest');
                 res.status(200).send({
                   status: 'ok',
@@ -137,14 +137,14 @@ module.exports.addToFriends = function (req, res, next) {
                 error.message = err.message;
                 return next(error);
               }  else {
-                 User.update({ _id: req.user._id }, { $addToSet: { friends: req.body.userid }, $pull: { friendRequests: req.body.userid }, friendsCount: count }, function (err, user) {
+                 User.findOneAndUpdate({ _id: req.user._id }, { $addToSet: { friends: req.body.userid }, $pull: { friendRequests: req.body.userid }, friendsCount: count }, { new: true }).exec(function (err, user) {
                     if (err) {
                       var error = new Error();
                       error.name = 'MongoSaveError';
                       error.message = err.message;
                       return next(error);
                     } else {
-                      User.update({ _id: req.body.userid }, { $addToSet: { friends: req.user._id }, $pull: { sentRequests: req.user._id }, friendsCount: count }).exec(function (err, user) {
+                      User.findOneAndUpdate({ _id: req.body.userid }, { $addToSet: { friends: req.user._id }, $pull: { sentRequests: req.user._id }, friendsCount: count }, { new: true }).exec(function (err, user) {
                         res.status(200).send({
                           status: 'ok',
                           message: 'You are now friends'
