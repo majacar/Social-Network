@@ -95,6 +95,18 @@ module.exports.profile = function (req, res, next) {
         }
       }
 
+      if (user.privacy == true) {
+        var friends = user.friends.map(function(b) {
+          return b.toString();
+        });
+        if (!friends.includes(req.user._id.toString())) {
+          var error = new Error();
+          error.name = 'Forbidden';
+          error.message = 'You are not friends';
+          return next(error); 
+      }
+    }
+
        if (user) {
         delete user.password;
         delete user.email;
