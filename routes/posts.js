@@ -14,7 +14,7 @@ var Image = require('../models/image');
 var Post = require('../models/post');
 
 /*
- * @api {post} /post/:userid
+ * @api {post} /post_users_wall/:userid
  * @apiVersion 1.0.0
  * @apiDescription Post text or photo on other users wall
  * @apiGroup Post
@@ -39,7 +39,7 @@ var Post = require('../models/post');
 */
 
 
-module.exports.post = function (req, res, next) {
+module.exports.post_users_wall = function (req, res, next) {
   if (req.body && req.params && req.params.userid) {
     User.findOne({ _id: req.params.userid }).lean().exec(function (err, user) {
           if (_.isNull(user)) {
@@ -128,7 +128,7 @@ module.exports.post = function (req, res, next) {
  * @api {post} /post
  * @apiVersion 1.0.0
  * @apiDescription Post text or photo on my wall
- * @apiGroup Post
+ * @apiGroup Posts and statuses
  *
  * @apiHeader {String} Token authorization value.
  * @apiHeaderExample {json} Token Example:
@@ -218,3 +218,114 @@ module.exports.post = function (req, res, next) {
     return next(error);
   }
 };
+
+/*
+ * @api {get} /posts
+ * @apiDescription View my wall and my posts and posts from other users
+ * @apiGroup Posts and statuses
+ *
+ * @apiSuccessExample Success-Response:
+  HTTP/1.1 200 OK
+{
+  "status": "ok",
+  "results": [
+    {
+      "_id": "58a989c2e44b12124c06a064",
+      "image": "https://s3.amazonaws.com/socialnetwork/730782bd-8e67-4bee-8e70-bb17d96213e7.png"
+    },
+    {
+      "_id": "58a98a14e5a2a21298dd3c17",
+      "text": "Nice day"
+    }
+  ]
+}
+*/
+
+module.exports.posts = function (req, res, next) {
+      User.findOne({ _id: req.user._id }).populate('wall', 'creator text image').exec(function (err, user) {
+        if (err) {
+          var error = new Error();
+          error.name = 'MongoSaveError';
+          error.message = err.message;
+          return next(error);
+        } else {
+          res.status(200).send({
+            status: 'ok',
+            results: user.wall
+          });
+        }
+      });
+  };
+
+  /*
+ * @api {get} /user_posts/:userid
+ * @apiDescription View list of my friends
+ * @apiGroup Friends
+ *
+ * @apiSuccessExample Success-Response:
+  HTTP/1.1 200 OK
+{
+  "status": "ok",
+  "results": [
+    {
+      "_id": "58a98b7e305a55131a5d58b1",
+      "text": "Hello!"
+    }
+  ]
+}
+*/
+
+module.exports.user_posts = function (req, res, next) {
+  if (req.params && req.params.userid) {
+      User.findOne({ _id: req.params.userid }).populate('wall', 'creator text image').exec(function (err, user) {
+        if (err) {
+          var error = new Error();
+          error.name = 'MongoSaveError';
+          error.message = err.message;
+          return next(error);
+        } else {
+
+        if (user && user.block) {
+          var block = user.block.map(function(b) {
+          return b.toString();
+        });
+
+        if (block.includes(req.user._id.toString())) {
+          var error = new Error();
+          error.name = 'Forbidden';
+          error.message = 'You are blocked';
+          return next(error);
+          }
+        }
+
+        if (user.privacy_only_friends == true) {
+          var friends = user.friends.map(function(b) {
+          return b.toString();
+        });
+
+        if (!friends.includes(req.user._id.toString())) {
+          var error = new Error();
+          error.name = 'Forbidden';
+          error.message = 'You are not friends';
+          return next(error); 
+          }
+        }
+
+        if (user.privacy_nobody == true) { 
+          var error = new Error();      
+          error.name = 'Forbidden';
+          error.message = 'This is not public profile';
+          return next(error); 
+        }
+          res.status(200).send({
+            status: 'ok',
+            results: user.wall
+          });
+        }      
+      });
+    } else {
+      var error = new Error();
+      error.name = 'MissingParamsError';
+      return next(error);
+    }
+  };
