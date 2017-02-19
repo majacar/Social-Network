@@ -67,6 +67,13 @@ module.exports.sendFriendRequest = function (req, res, next) {
               return next(error);
             }
 
+            if (user.privacy_nobody == true) { 
+              var error = new Error();      
+              error.name = 'Forbidden';
+              error.message = 'This is not public profile';
+              return next(error); 
+            }
+
             User.findOneAndUpdate({ _id: req.user._id }, { $addToSet: { sentRequests: req.body.userid } }, { new: true }).exec(function (err, user) {
                 emitter.emit('sendFriendRequest');
                 res.status(200).send({

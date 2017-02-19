@@ -95,7 +95,7 @@ module.exports.profile = function (req, res, next) {
         }
       }
 
-      if (user.privacy == true) {
+      if (user.privacy_only_friends == true) {
         var friends = user.friends.map(function(b) {
           return b.toString();
         });
@@ -104,8 +104,16 @@ module.exports.profile = function (req, res, next) {
           error.name = 'Forbidden';
           error.message = 'You are not friends';
           return next(error); 
+        }
       }
-    }
+
+      if (user.privacy_nobody == true) { 
+          var error = new Error();      
+          error.name = 'Forbidden';
+          error.message = 'This is not public profile';
+          return next(error); 
+      }
+    
 
        if (user) {
         delete user.password;
