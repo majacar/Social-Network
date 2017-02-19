@@ -103,7 +103,7 @@ router
   .post('/backgroundImage', AuthCheck.ensureAuth, ProfileController.backgroundImage)
   .post('/profilePicture', AuthCheck.ensureAuth, ProfileController.profilePicture)
   .get('/pictures/:userid', AuthCheck.ensureAuth, ProfileController.pictures)
-  .post('/post/:userid', AuthCheck.ensureAuth, PostController.post)
+  .post('/post_users_wall/:userid', AuthCheck.ensureAuth, PostController.post_users_wall)
   .post('/post', AuthCheck.ensureAuth, PostController.post)
   .post('/sendFriendRequest', AuthCheck.ensureAuth, FriendsController.sendFriendRequest)
   .get('/sendFriendRequest/stream', AuthCheck.ensureAuth, FriendsController.stream)
@@ -111,7 +111,9 @@ router
   .get('/friends', AuthCheck.ensureAuth, FriendsController.friends)
   .get('/friends/:userid', AuthCheck.ensureAuth, FriendsController.user_friends)
   .post('/block', AuthCheck.ensureAuth, UsersController.block)
-  .post('/unblock', AuthCheck.ensureAuth, UsersController.unblock);
+  .post('/unblock', AuthCheck.ensureAuth, UsersController.unblock)
+  .get('/posts', AuthCheck.ensureAuth, PostController.posts)
+  .get('/user_posts/:userid', AuthCheck.ensureAuth, PostController.user_posts);
 
 app.use('/api/v1', router);
 

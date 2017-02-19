@@ -26,7 +26,8 @@ var User = new Schema({
   friendRequests: [{ type: Schema.ObjectId, ref: 'User' }],
   sentRequests: [{ type: Schema.ObjectId, ref: 'User' }],
   block: [{ type: Schema.ObjectId, ref: 'User' }],
-  privacy: { type: Boolean, default: false },
+  privacy_only_friends: { type: Boolean, default: false },
+  privacy_nobody: { type: Boolean, default: false },
 }, { versionKey: false });
 
 User.path('email').validate(function (email) {
