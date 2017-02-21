@@ -58,6 +58,39 @@ module.exports.post_users_wall = function (req, res, next) {
             return next(error);
           }
 
+          if (user && user.block) {
+            var block = user.block.map(function(b) {
+            return b.toString();
+          });
+
+            if (block.includes(req.user._id.toString())) {
+              var error = new Error();
+              error.name = 'Forbidden';
+              error.message = 'You are blocked';
+              return next(error);
+            }
+          }
+
+          if (user.privacy_only_friends == true) {
+            var friends = user.friends.map(function(b) {
+            return b.toString();
+          });
+
+            if (!friends.includes(req.user._id.toString())) {
+              var error = new Error();
+              error.name = 'Forbidden';
+              error.message = 'You are not friends';
+              return next(error); 
+            }
+          }
+
+          if (user.privacy_nobody == true) { 
+            var error = new Error();      
+            error.name = 'Forbidden';
+            error.message = 'This is not public profile';
+            return next(error); 
+          }
+
           if (user) {
             var post = new Post();
             var updateSet = { $addToSet: { wall: post._id }};
