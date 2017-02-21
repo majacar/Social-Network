@@ -16,7 +16,7 @@ describe('Post on other users wall', function () {
       userHelper.register_user(function (result2) {
 
     request(app)
-      .post('/api/v1/post/' + result2.user._id)
+      .post('/api/v1/post_users_wall/' + result2.user._id)
       .set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + result1.token)
       .send({  
@@ -43,7 +43,7 @@ describe('Post on other users wall', function () {
       userHelper.register_user(function (result2) {
 
     request(app)
-      .post('/api/v1/post/' + result2.user._id)
+      .post('/api/v1/post_users_wall/' + result2.user._id)
       .set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + result1.token)
       .send({  

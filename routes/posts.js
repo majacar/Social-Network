@@ -31,6 +31,8 @@ var Post = require('../models/post');
     "__v": 0,
     "updatedAt": "2017-02-08T19:44:53.338Z",
     "createdAt": "2017-02-08T19:44:53.338Z",
+    "creator": "58a84f68c5931f0e62c3068f",
+    "wall": "58a84f68c5931f0e62c3078g",
     "text": "Hello!!!",
     "_id": "589b7535bfe2f61bb730ecae"
   }
@@ -56,6 +58,39 @@ module.exports.post_users_wall = function (req, res, next) {
             return next(error);
           }
 
+          if (user && user.block) {
+            var block = user.block.map(function(b) {
+            return b.toString();
+          });
+
+            if (block.includes(req.user._id.toString())) {
+              var error = new Error();
+              error.name = 'Forbidden';
+              error.message = 'You are blocked';
+              return next(error);
+            }
+          }
+
+          if (user.privacy_only_friends == true) {
+            var friends = user.friends.map(function(b) {
+            return b.toString();
+          });
+
+            if (!friends.includes(req.user._id.toString())) {
+              var error = new Error();
+              error.name = 'Forbidden';
+              error.message = 'You are not friends';
+              return next(error); 
+            }
+          }
+
+          if (user.privacy_nobody == true) { 
+            var error = new Error();      
+            error.name = 'Forbidden';
+            error.message = 'This is not public profile';
+            return next(error); 
+          }
+
           if (user) {
             var post = new Post();
             var updateSet = { $addToSet: { wall: post._id }};
@@ -74,6 +109,9 @@ module.exports.post_users_wall = function (req, res, next) {
 
             if (!_.isUndefined(req.body.text)) {
               post.text = req.body.text;
+
+              post.creator = req.user._id;
+              post.wall = req.params.userid;
 
               post.save(function (err, data) {
                     if (err) {
@@ -142,6 +180,8 @@ module.exports.post_users_wall = function (req, res, next) {
     "__v": 0,
     "updatedAt": "2017-02-15T14:33:40.903Z",
     "createdAt": "2017-02-15T14:33:40.903Z",
+    "creator": "58a84f68c5931f0e62c3068f",
+    "wall": "58a84f68c5931f0e62c3068f",
     "image": "https://s3.amazonaws.com/socialnetwork/bfea7a4d-2b09-4b38-857d-ab5494814818.png",
     "_id": "58a466c4e316b90f67c439fa"
   }
@@ -171,6 +211,9 @@ module.exports.post = function (req, res, next) {
 
             if (!_.isUndefined(req.body.text)) {
               post.text = req.body.text;
+
+              post.creator = req.user._id;
+              post.wall = req.user._id;
 
               post.save(function (err, data) {
                     if (err) {
@@ -317,10 +360,12 @@ module.exports.user_posts = function (req, res, next) {
           error.message = 'This is not public profile';
           return next(error); 
         }
+
           res.status(200).send({
             status: 'ok',
             results: user.wall
-          });
+          });       
+          
         }      
       });
     } else {

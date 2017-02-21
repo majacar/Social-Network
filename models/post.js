@@ -12,8 +12,7 @@ var Post = new Schema({
   text: { type: String },
   image: { type: String },
   creator: { type: Schema.ObjectId, ref: 'User' },
-  privacy_only_friends: { type: Boolean, default: false },
-  privacy_nobody: { type: Boolean, default: false } },
+  wall: { type: Schema.ObjectId, ref: 'User' } },
   { timestamps: true }
 );
 
