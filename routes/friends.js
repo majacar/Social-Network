@@ -169,6 +169,53 @@ module.exports.addToFriends = function (req, res, next) {
 };
 
 /*
+ * @api {delete} /remove_friend
+ * @apiVersion 1.0.0
+ * @apiDescription Add user to friends
+ * @apiGroup Friends
+ *
+ * @apiSuccessExample Success-Response:
+   HTTP/1.1 200 OK
+{
+  "status": "ok",
+  "message": "You are now friends"
+}
+*/
+
+module.exports.remove_friend = function (req, res, next) {
+  if (req.body && req.body.userid) {
+    User.count({ friends: req.body.userid }).exec(function (err, count) {
+              if (err) {
+                var error = new Error();
+                error.name = 'MongoSaveError';
+                error.message = err.message;
+                return next(error);
+              }  else {
+                 User.findOneAndUpdate({ _id: req.user._id }, { $pull: { friends: req.body.userid }, friendsCount: count }, { new: true }).exec(function (err, user) {
+                    if (err) {
+                      var error = new Error();
+                      error.name = 'MongoSaveError';
+                      error.message = err.message;
+                      return next(error);
+                    } else {
+                      User.findOneAndUpdate({ _id: req.body.userid }, { $pull: { friends: req.user._id }, friendsCount: count }, { new: true }).exec(function (err, user) {
+                        res.status(200).send({
+                          status: 'ok',
+                          message: 'You are no longer friends'
+                        });
+                      });
+                    }
+                  });
+              }
+            });
+  } else {
+    var error = new Error();
+    error.name = 'MissingParamsError';
+    return next(error);
+  }
+};
+
+/*
  * @api {get} /friends
  * @apiDescription View list of my friends
  * @apiGroup Friends
@@ -237,6 +284,40 @@ module.exports.user_friends = function (req, res, next) {
           error.message = err.message;
           return next(error);
         } else {
+
+          if (user && user.block) {
+            var block = user.block.map(function(b) {
+            return b.toString();
+          });
+
+            if (block.includes(req.user._id.toString())) {
+              var error = new Error();
+              error.name = 'Forbidden';
+              error.message = 'You are blocked';
+              return next(error);
+            }
+          }
+
+          if (user.privacy_only_friends == true) {
+            var friends = user.friends.map(function(b) {
+            return b.toString();
+          });
+
+            if (!friends.includes(req.user._id.toString())) {
+              var error = new Error();
+              error.name = 'Forbidden';
+              error.message = 'You are not friends';
+              return next(error); 
+            }
+          }
+
+          if (user.privacy_nobody == true) { 
+            var error = new Error();      
+            error.name = 'Forbidden';
+            error.message = 'This is not public profile';
+            return next(error); 
+          }
+          
           res.status(200).send({
             status: 'ok',
             results: user.friends

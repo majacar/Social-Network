@@ -1,5 +1,5 @@
 /**
- * Friend Requests and Add to friends
+ * Friends Tests
  */
 
 var app = require('../../app');
@@ -8,7 +8,7 @@ var should = require('chai').should();
 var faker = require('faker');
 var userHelper = require('../helpers/user');
 
-describe('Send friend request and Add user to Friends', function () {
+describe('Friends tests', function () {
 
   it('POST /post Should return Friend request was sent', function (done) {
     userHelper.register_user(function (result1) {
@@ -92,6 +92,32 @@ describe('Send friend request and Add user to Friends', function () {
 
           should.not.exist(err);
           res.body.message.should.equal('You are now friends');
+          done();
+        });
+      });
+     });
+  });
+
+ it('DELETE /remove_friend Should remove from friends', function (done) {
+    userHelper.register_user(function (result1) {
+
+      userHelper.register_user(function (result2) {
+
+      request(app)
+      .delete('/api/v1/remove_friend')
+      .set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + result1.token)
+      .send({
+          userid: result2.user._id
+        })
+      .expect(200)
+      .end(function (err, res) {
+          if (err) {
+            throw err;
+          }
+
+          should.not.exist(err);
+          res.body.message.should.equal('You are no longer friends');
           done();
         });
       });
