@@ -237,6 +237,40 @@ module.exports.user_friends = function (req, res, next) {
           error.message = err.message;
           return next(error);
         } else {
+
+          if (user && user.block) {
+            var block = user.block.map(function(b) {
+            return b.toString();
+          });
+
+            if (block.includes(req.user._id.toString())) {
+              var error = new Error();
+              error.name = 'Forbidden';
+              error.message = 'You are blocked';
+              return next(error);
+            }
+          }
+
+          if (user.privacy_only_friends == true) {
+            var friends = user.friends.map(function(b) {
+            return b.toString();
+          });
+
+            if (!friends.includes(req.user._id.toString())) {
+              var error = new Error();
+              error.name = 'Forbidden';
+              error.message = 'You are not friends';
+              return next(error); 
+            }
+          }
+
+          if (user.privacy_nobody == true) { 
+            var error = new Error();      
+            error.name = 'Forbidden';
+            error.message = 'This is not public profile';
+            return next(error); 
+          }
+          
           res.status(200).send({
             status: 'ok',
             results: user.friends
