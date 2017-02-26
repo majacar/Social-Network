@@ -31,6 +31,7 @@ var UsersController = require('./routes/users');
 var ProfileController = require('./routes/profile');
 var PostController = require('./routes/posts');
 var FriendsController = require('./routes/friends');
+var PageController = require('./routes/pages');
 
 // include in the app
 app.use(config.cors);
@@ -114,7 +115,8 @@ router
   .post('/block', AuthCheck.ensureAuth, UsersController.block)
   .post('/unblock', AuthCheck.ensureAuth, UsersController.unblock)
   .get('/posts', AuthCheck.ensureAuth, PostController.posts)
-  .get('/user_posts/:userid', AuthCheck.ensureAuth, PostController.user_posts);
+  .get('/user_posts/:userid', AuthCheck.ensureAuth, PostController.user_posts)
+  .post('/create_page', AuthCheck.ensureAuth, PageController.create_page);
 
 app.use('/api/v1', router);
 
