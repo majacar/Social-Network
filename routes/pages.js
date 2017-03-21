@@ -1,5 +1,5 @@
 /**
- * Create page
+ * Pages routes
  * @type {exports}
  */
 
@@ -83,6 +83,64 @@ module.exports.create_page = function (req, res, next) {
                 }
               });
 
+  } else {
+    var error = new Error();
+    error.name = 'MissingParamsError';
+    return next(error);
+  }
+};
+
+/*
+ * @api {delete} /delete_page
+ * @apiVersion 1.0.0
+ * @apiDescription Delete page
+ * @apiGroup Pages
+ *
+ * @apiHeader {String} Token authorization value.
+ * @apiHeaderExample {json} Token Example:
+ * {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJ..."}
+ *
+ * @apiSuccessExample Success-Response:
+   HTTP/1.1 200 OK
+   {
+  "status": "ok",
+  "message": "Successfully deleted"
+}
+*/
+
+module.exports.delete_page = function (req, res, next) {
+  if (req.params && req.params.pageid) {
+    Page.findOne({ _id: req.params.pageid }, function (err, page) {
+      if (err) {
+        var error = new Error();
+        error.name = 'MongoSaveError';
+        error.message = err.message;
+        return next(error);
+      } else {
+        if (page.admin.toString() !== req.user._id.toString()) {
+          var error = new Error();
+          error.name = 'NotAcceptable';
+          return next(error);
+        } else {
+          Page.findOneAndRemove({ _id: req.params.pageid }, function (err, page) {
+            if (err) {
+              var error = new Error();
+              error.name = 'MongoDeleteError';
+              error.message = err.message;
+              return next(error, null);
+            } else {
+              User.findOneAndUpdate({ _id: page.admin }, { $pull: { pages: req.params.pageid }}).exec(function (err, page) {
+                if (err) return next(err);
+                res.status(200).send({
+                  status: 'ok',
+                  message: 'Successfully deleted'
+                });
+              });
+            }
+          });
+        }
+      }
+    });
   } else {
     var error = new Error();
     error.name = 'MissingParamsError';

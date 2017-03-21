@@ -116,7 +116,8 @@ router
   .post('/unblock', AuthCheck.ensureAuth, UsersController.unblock)
   .get('/posts', AuthCheck.ensureAuth, PostController.posts)
   .get('/user_posts/:userid', AuthCheck.ensureAuth, PostController.user_posts)
-  .post('/create_page', AuthCheck.ensureAuth, PageController.create_page);
+  .post('/create_page', AuthCheck.ensureAuth, PageController.create_page)
+  .delete('/delete_page/:pageid', AuthCheck.ensureAuth, PageController.delete_page);
 
 app.use('/api/v1', router);
 
