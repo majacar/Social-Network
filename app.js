@@ -117,7 +117,8 @@ router
   .get('/posts', AuthCheck.ensureAuth, PostController.posts)
   .get('/user_posts/:userid', AuthCheck.ensureAuth, PostController.user_posts)
   .post('/create_page', AuthCheck.ensureAuth, PageController.create_page)
-  .delete('/delete_page/:pageid', AuthCheck.ensureAuth, PageController.delete_page);
+  .delete('/delete_page/:pageid', AuthCheck.ensureAuth, PageController.delete_page)
+  .get('/my_pages/:userid', AuthCheck.ensureAuth, PageController.my_pages);
 
 app.use('/api/v1', router);
 

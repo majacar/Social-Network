@@ -147,3 +147,48 @@ module.exports.delete_page = function (req, res, next) {
     return next(error);
   }
 };
+
+/*
+ * @api {get} /my_pages
+ * @apiVersion 1.0.0
+ * @apiDescription View my Pages
+ * @apiGroup Pages
+ *
+ * @apiHeader {String} Token authorization value.
+ * @apiHeaderExample {json} Token Example:
+ * {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJ..."}
+ *
+ * @apiSuccessExample Success-Response:
+   HTTP/1.1 200 OK
+   {
+  "status": "ok",
+  "results": [
+    {
+      "_id": "58f50b696abede08d342e679",
+      "image": "https://s3.amazonaws.com/soundhills/b2569336-d774-4f27-af29-e3aab5af80b4.png",
+      "title": "Moja firma",
+      "admin": "58a84f68c5931f0e62c3068f",
+      "__v": 0,
+      "date_created": "2017-04-17T18:37:29.800Z"
+    }
+  ]
+}
+*/
+
+module.exports.my_pages = function (req, res, next) {
+    if (req.params && req.params.userid) {
+      Page.find({ admin: req.params.userid }).sort('likes').exec(function (err, pages) {
+        if (err) {
+          var error = new Error();
+          error.name = 'MongoSaveError';
+          error.message = err.message;
+          return next(error);
+        } else {
+          res.status(200).send({
+            status: 'ok',
+            results: pages
+          });
+        }
+      });
+    }
+  };
